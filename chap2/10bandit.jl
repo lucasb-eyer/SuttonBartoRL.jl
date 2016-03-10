@@ -100,30 +100,23 @@ const NROUNDS=2000
 const NGAMES=2000
 
 mbs = [multibandit(10) for i=1:NGAMES]
-g_players    = [GreedyPlayer(valueestim(mbs[i])) for i=1:length(mbs)]
-ϵ01_players  = [ϵGreedyPlayer(valueestim(mbs[i]), 0.1) for i=1:length(mbs)]
-ϵ001_players = [ϵGreedyPlayer(valueestim(mbs[i]), 0.01) for i=1:length(mbs)]
-τ10_players  = [τGreedyPlayer(valueestim(mbs[i]), 10) for i=1:length(mbs)]
-τ100_players = [τGreedyPlayer(valueestim(mbs[i]), 100) for i=1:length(mbs)]
-sm01_players = [SoftMaxPlayer(valueestim(mbs[i]), 0.1) for i=1:length(mbs)]
-sm1_players  = [SoftMaxPlayer(valueestim(mbs[i]), 1) for i=1:length(mbs)]
 
-# Now y'all Play!
-r_g    = [play!(p, mb) for e=1:NROUNDS, (mb, p) in zip(mbs, g_players)]
-r_ϵ01  = [play!(p, mb) for e=1:NROUNDS, (mb, p) in zip(mbs, ϵ01_players)]
-r_ϵ001 = [play!(p, mb) for e=1:NROUNDS, (mb, p) in zip(mbs, ϵ001_players)]
-r_τ10  = [play!(p, mb) for e=1:NROUNDS, (mb, p) in zip(mbs, τ10_players)]
-r_τ100 = [play!(p, mb) for e=1:NROUNDS, (mb, p) in zip(mbs, τ100_players)]
-r_sm01 = [play!(p, mb) for e=1:NROUNDS, (mb, p) in zip(mbs, sm01_players)]
-r_sm1  = [play!(p, mb) for e=1:NROUNDS, (mb, p) in zip(mbs, sm1_players)]
+for (mkplayer, name) in [
+    ((ve)-> GreedyPlayer(ve), "Greedy"),
+    ((ve)->ϵGreedyPlayer(ve, 0.1), L"$\epsilon$=0.1 Greedy"),
+    ((ve)->ϵGreedyPlayer(ve, 0.01), L"$\epsilon$=0.01 Greedy"),
+    ((ve)->τGreedyPlayer(ve, 10), L"$\tau=10$ Greedy"),
+    ((ve)->τGreedyPlayer(ve, 100), L"$\tau=100$ Greedy"),
+    ((ve)->SoftMaxPlayer(ve, 0.1), L"$\tau=0.1$ SoftMax"),
+    ((ve)->SoftMaxPlayer(ve, 1), L"$\tau=1$ SoftMax"),
+]
+    println("Playing", name, "...")
+    players = [mkplayer(valueestim(mbs[i])) for i=1:length(mbs)]
+    rewards = [play!(p, mb) for _=1:NROUNDS, (mb, p) in zip(mbs, players)]
 
-plot(mean(r_g, 2), label="Greedy")
-plot(mean(r_ϵ01, 2), label=L"$\epsilon$=0.1 Greedy")
-plot(mean(r_ϵ001, 2), label=L"$\epsilon$=0.01 Greedy")
-plot(mean(r_τ10, 2), label=L"$\tau=10$ Greedy")
-plot(mean(r_τ100, 2), label=L"$\tau=100$ Greedy")
-plot(mean(r_sm01, 2), label=L"$\tau=0.1$ SoftMax")
-plot(mean(r_sm1 , 2), label=L"$\tau=1$ SoftMax")
+    plot(mean(rewards, 2), label=name)
+end
+
 title("10-armed bandit")
 xlabel("epochs (plays)")
 ylabel("average reward")
