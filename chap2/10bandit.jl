@@ -99,7 +99,7 @@ choose_action(p::SoftMaxPlayer) = rand(Categorical(softmax(p.v.Qa, p.τ)))
 # =========
 
 const NROUNDS=2000
-const NGAMES=2000
+const NGAMES=1000
 
 fig, (ax1, ax2) = subplots(2, 1)
 
