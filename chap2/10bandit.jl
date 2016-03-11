@@ -12,10 +12,10 @@ end
 multibandit(n) = MultiBandit(randn(n), ones(n))
 
 import Base.length
-length(mb::MultiBandit) = length(mb.μ)
+length(b::MultiBandit) = length(b.μ)
 
-play(mb::MultiBandit, a) = randn()*mb.σ[a] + mb.μ[a]
-best(mb::MultiBandit) = indmax(mb.μ)
+play(b::MultiBandit, a) = randn()*b.σ[a] + b.μ[a]
+best(b::MultiBandit) = indmax(b.μ)
 
 # The players!
 # ============
@@ -30,7 +30,7 @@ immutable SampleAverage <: ValueEstimater
     SampleAverage(n) = new(zeros(n), zeros(Int64, n))
 end
 
-sampleavg_ve(mb::MultiBandit) = SampleAverage(length(mb))
+sampleavg_ve(b::MultiBandit) = SampleAverage(length(b))
 
 function update!(v::SampleAverage, r, a)
     # Very simple "empirical mean" estimator.
@@ -41,9 +41,9 @@ end
 abstract Player
 
 # Generic playing
-function play!(p::Player, mb::MultiBandit)
+function play!(p::Player, b::MultiBandit)
     a = choose_action(p)
-    r = play(mb, a)
+    r = play(b, a)
     update!(p, r, a)
     return a, r
 end
@@ -133,9 +133,9 @@ for (mkplayer, name) in [
 end
 
 fig[:suptitle]("10-armed bandit", fontsize=16)
-ax1[:set_xlabel]("epochs [plays]")
-ax2[:set_xlabel]("epochs [plays]")
-ax1[:set_ylabel]("average reward")
+ax1[:set_xlabel]("Epoch [plays]")
+ax2[:set_xlabel]("Epoch [plays]")
+ax1[:set_ylabel]("Average reward")
 ax2[:set_ylabel]("Optimal action [%]")
 ax1[:legend](loc="lower right")
 ax2[:legend](loc="lower right")
