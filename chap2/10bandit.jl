@@ -1,3 +1,4 @@
+using Distributions
 using PyPlot
 plt[:style][:use]("ggplot")
 
@@ -87,11 +88,8 @@ immutable SoftMaxPlayer <: Player
 end
 
 # Compute softmax of `x` at temperature `τ`
-function softmax(x, τ) ex = exp(x/τ) ; return ex ./ sum(ex) end
-# Sample from multinomial (softmax) distribution `p`.
-multinomial(p) = findfirst(rand() .< cumsum(p))
-
-choose_action(p::SoftMaxPlayer) = multinomial(softmax(p.v.Qa, p.τ))
+function softmax(x, τ) ex = exp(x/τ) ; return ex / sum(ex) end
+choose_action(p::SoftMaxPlayer) = rand(Categorical(softmax(p.v.Qa, p.τ)))
 
 # Thug Aim!
 # =========
@@ -110,7 +108,7 @@ for (mkplayer, name) in [
     ((ve)->SoftMaxPlayer(ve, 0.1), L"$\tau=0.1$ SoftMax"),
     ((ve)->SoftMaxPlayer(ve, 1), L"$\tau=1$ SoftMax"),
 ]
-    println("Playing", name, "...")
+    println("Playing ", name, "...")
     players = [mkplayer(valueestim(mbs[i])) for i=1:length(mbs)]
     rewards = [play!(p, mb) for _=1:NROUNDS, (mb, p) in zip(mbs, players)]
 
