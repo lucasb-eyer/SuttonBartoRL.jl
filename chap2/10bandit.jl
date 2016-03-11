@@ -19,17 +19,19 @@ play(mb::MultiBandit, a) = randn()*mb.σ[a] + mb.μ[a]
 # The players!
 # ============
 
-# All players use the same way of estimating value for this plot.
-immutable ValueEstimater
-    Qa::Vector{Float64}
-    Na::Vector{Int}
+abstract ValueEstimater
 
-    ValueEstimater(n) = new(zeros(n), zeros(Int64, n))
+# All players use the same way of estimating value for this plot.
+immutable SampleAverage <: ValueEstimater
+    Qa::Vector{Float64}
+    Na::Vector{Int64}
+
+    SampleAverage(n) = new(zeros(n), zeros(Int64, n))
 end
 
-valueestim(mb::MultiBandit) = ValueEstimater(length(mb))
+sampleavg_ve(mb::MultiBandit) = SampleAverage(length(mb))
 
-function update!(v::ValueEstimater, r, a)
+function update!(v::SampleAverage, r, a)
     # Very simple "empirical mean" estimator.
     v.Na[a] += 1
     v.Qa[a] += 1/v.Na[a] * (r - v.Qa[a])
@@ -109,7 +111,7 @@ for (mkplayer, name) in [
     ((ve)->SoftMaxPlayer(ve, 1), L"$\tau=1$ SoftMax"),
 ]
     println("Playing ", name, "...")
-    players = [mkplayer(valueestim(mbs[i])) for i=1:length(mbs)]
+    players = [mkplayer(sampleavg_ve(mbs[i])) for i=1:length(mbs)]
     rewards = [play!(p, mb) for _=1:NROUNDS, (mb, p) in zip(mbs, players)]
 
     plot(mean(rewards, 2), label=name)
