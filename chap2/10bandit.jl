@@ -15,6 +15,7 @@ import Base.length
 length(mb::MultiBandit) = length(mb.μ)
 
 play(mb::MultiBandit, a) = randn()*mb.σ[a] + mb.μ[a]
+best(mb::MultiBandit) = indmax(mb.μ)
 
 # The players!
 # ============
@@ -44,7 +45,7 @@ function play!(p::Player, mb::MultiBandit)
     a = choose_action(p)
     r = play(mb, a)
     update!(p, r, a)
-    return r
+    return a, r
 end
 
 # Generic updating only updates value estimator
@@ -91,6 +92,7 @@ end
 
 # Compute softmax of `x` at temperature `τ`
 function softmax(x, τ) ex = exp(x/τ) ; return ex / sum(ex) end
+
 choose_action(p::SoftMaxPlayer) = rand(Categorical(softmax(p.v.Qa, p.τ)))
 
 # Thug Aim!
@@ -99,7 +101,7 @@ choose_action(p::SoftMaxPlayer) = rand(Categorical(softmax(p.v.Qa, p.τ)))
 const NROUNDS=2000
 const NGAMES=2000
 
-mbs = [multibandit(10) for i=1:NGAMES]
+fig, (ax1, ax2) = subplots(2, 1)
 
 for (mkplayer, name) in [
     ((ve)-> GreedyPlayer(ve), "Greedy"),
@@ -111,14 +113,30 @@ for (mkplayer, name) in [
     ((ve)->SoftMaxPlayer(ve, 1), L"$\tau=1$ SoftMax"),
 ]
     println("Playing ", name, "...")
-    players = [mkplayer(sampleavg_ve(mbs[i])) for i=1:length(mbs)]
-    rewards = [play!(p, mb) for _=1:NROUNDS, (mb, p) in zip(mbs, players)]
 
-    plot(mean(rewards, 2), label=name)
+    rewards = zeros(NROUNDS, NGAMES)
+    actions = zeros(Int64, NROUNDS, NGAMES)
+    bestact = zeros(Int64, NGAMES)
+    for g=1:NGAMES
+        bandit = multibandit(10)
+        player = mkplayer(sampleavg_ve(bandit))
+
+        for r=1:NROUNDS
+            actions[r,g], rewards[r,g] = play!(player, bandit)
+        end
+
+        bestact[g] = best(bandit)
+    end
+
+    ax1[:plot](mean(rewards, 2), label=name)
+    ax2[:plot](mean(actions .== bestact', 2)*100, label=name)
 end
 
-title("10-armed bandit")
-xlabel("epochs (plays)")
-ylabel("average reward")
-legend(loc="lower right")
+fig[:suptitle]("10-armed bandit", fontsize=16)
+ax1[:set_xlabel]("epochs [plays]")
+ax2[:set_xlabel]("epochs [plays]")
+ax1[:set_ylabel]("average reward")
+ax2[:set_ylabel]("Optimal action [%]")
+ax1[:legend](loc="lower right")
+ax2[:legend](loc="lower right")
 show()
