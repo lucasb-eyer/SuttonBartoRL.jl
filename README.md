@@ -7,3 +7,4 @@ and an [incomplete draft of the second edition](https://www.dropbox.com/s/b3psxv
 (Yes, this is all legal, from [the author's own page](https://webdocs.cs.ualberta.ca/~sutton/book/the-book.html).)
 
 As long as I'm reading the book and figuring things out, this whole repo is, of course, highly in flux!
+I'll be following [the rule of three](http://blog.codinghorror.com/rule-of-three/), meaning I'll only abstract things away if they are needed in at least three of the examples!
