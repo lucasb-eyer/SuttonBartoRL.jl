@@ -24,19 +24,19 @@ best(b::MultiBandit) = indmax(b.μ)
 # Thug Aim!
 # =========
 
-const NROUNDS=2000
-const NGAMES=1000
+const NROUNDS=1400
+const NGAMES=2000
 
-fig, (ax1, ax2) = subplots(2, 1)
+fig, (ax1, ax2) = subplots(2, 1, figsize=(8,6))
 
 for (mkplayer, name) in [
-    ((ve)-> GreedyPlayer(ve), "Greedy"),
-    ((ve)->ϵGreedyPlayer(ve, 0.1), L"$\epsilon$=0.1 Greedy"),
-    ((ve)->ϵGreedyPlayer(ve, 0.01), L"$\epsilon$=0.01 Greedy"),
+    ((ve)->ϵGreedyPlayer(ve, 0.1), L"$\epsilon=0.1$ Greedy"),
+    ((ve)->ϵGreedyPlayer(ve, 0.01), L"$\epsilon=0.01$ Greedy"),
     ((ve)->τGreedyPlayer(ve, 10), L"$\tau=10$ Greedy"),
     ((ve)->τGreedyPlayer(ve, 100), L"$\tau=100$ Greedy"),
     ((ve)->SoftMaxPlayer(ve, 0.1), L"$\tau=0.1$ SoftMax"),
     ((ve)->SoftMaxPlayer(ve, 1), L"$\tau=1$ SoftMax"),
+    ((ve)-> GreedyPlayer(ve), "Greedy"),
 ]
     println("Playing ", name, "...")
 
@@ -58,10 +58,9 @@ for (mkplayer, name) in [
 end
 
 fig[:suptitle]("10-armed bandit", fontsize=16)
-ax1[:set_xlabel]("Epoch [plays]")
 ax2[:set_xlabel]("Epoch [plays]")
 ax1[:set_ylabel]("Average reward")
 ax2[:set_ylabel]("Optimal action [%]")
-ax1[:legend](loc="lower right")
-ax2[:legend](loc="lower right")
+leg = fig[:legend](ax1[:get_legend_handles_labels]()..., loc="right", bbox_to_anchor=(0.9, 0.55), ncol=1)
+# fig[:savefig]("plots/2.2.png", bbox_inches="tight", bbox_extra_artists=(leg,))
 show()
