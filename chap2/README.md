@@ -7,4 +7,4 @@ The bandits are 10-armed, each arm giving a normally distributed random reward w
 The action values are estimated by the sample means.
 The main point of this plot is that you need exploration to perform well on such a stochastic task.
 
-![Figure 2.1](plots/2.2.png)
+<p align=middle><img src=plots/2.2.png/></p>
