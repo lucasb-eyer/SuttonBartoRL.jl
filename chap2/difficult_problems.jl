@@ -2,6 +2,10 @@ using Distributions
 using PyPlot
 plt[:style][:use]("ggplot")
 
+include("utils.jl")
+include("value_estimators.jl")
+include("players.jl")
+
 # The machine!
 # ============
 immutable BinaryBandit
@@ -25,50 +29,8 @@ length(::BinaryBandit) = 2
 play(b::BinaryBandit, a::Int64) = b.r[2-Int(rand() < b.p[a])]
 best(b::BinaryBandit) = indmax(b.p)
 
-# The players!
-# ============
-
-abstract ValueEstimator
-
-# The sample-average value estimator
-immutable SampleAverage <: ValueEstimator
-    Qa::Vector{Float64}
-    Na::Vector{Int64}
-
-    SampleAverage(n) = new(zeros(n), zeros(Int64, n))
-end
-
-sampleavg_ve(::BinaryBandit) = SampleAverage(2)
-
-function update!(v::SampleAverage, r, a)
-    # Very simple "empirical mean" estimator.
-    v.Na[a] += 1
-    v.Qa[a] += 1/v.Na[a] * (r - v.Qa[a])
-end
-
-abstract Player
-
-# Generic playing
-function play!(p::Player, b::BinaryBandit)
-    a = choose_action(p)
-    r = play(b, a)
-    update!(p, r, a)
-    return a, r
-end
-
-# Generic updating only updates value estimator
-update!(p::Player, r, a) = update!(p.v, r, a)
-
-# Mr. ϵ-greedy!
-# -------------
-
-immutable ϵGreedyPlayer <: Player
-    v::ValueEstimator
-    ϵ::Float64
-end
-
-# With a small probability, go randomly, else just GO GREEDY
-choose_action(p::ϵGreedyPlayer) = rand() < p.ϵ ? rand(1:length(p.v.Qa)) : indmax(p.v.Qa)
+# Players specialized to the binary task!
+# ===============
 
 # Mr. Supervised!
 # ---------------
@@ -77,7 +39,7 @@ immutable SupervisedPlayer <: Player
     v::ValueEstimator
 end
 
-choose_action(p::SupervisedPlayer) = indmax(p.v.Qa)
+choose_action(p::SupervisedPlayer) = best(p.v)
 
 function update!(p::SupervisedPlayer, r, a)
     update!(p.v,  r, a)
@@ -150,15 +112,15 @@ for (probs, ax) in (
     bs = [bandit(probs...) for i=1:NGAMES]
 
     for (mkplayer, name) in [
-        ((b)->SupervisedPlayer(sampleavg_ve(b)), "Supervised"),
-        ((b)->ϵGreedyPlayer(sampleavg_ve(b), 0.1), L"$\epsilon$=0.1 Greedy"),
-        ((b)->ϵGreedyPlayer(sampleavg_ve(b), 0.01), L"$\epsilon$=0.01 Greedy"),
-        ((b)->LRPPlayer(0.1, length(b)), L"0.1 $L_{R-P}$"),
-        ((b)->LRIPlayer(0.1, length(b)), L"0.1 $L_{R-I}$"),
-        ((b)->LRIPlayer(0.01, length(b)), L"0.01 $L_{R-I}$"),
+        ((n)->SupervisedPlayer(SampleAverage(n)), "Supervised"),
+        ((n)->ϵGreedyPlayer(SampleAverage(n), 0.1), L"$\epsilon$=0.1 Greedy"),
+        ((n)->ϵGreedyPlayer(SampleAverage(n), 0.01), L"$\epsilon$=0.01 Greedy"),
+        ((n)->LRPPlayer(0.1, n), L"0.1 $L_{R-P}$"),
+        ((n)->LRIPlayer(0.1, n), L"0.1 $L_{R-I}$"),
+        ((n)->LRIPlayer(0.01, n), L"0.01 $L_{R-I}$"),
     ]
         println("Playing ", name, "...")
-        actions = [play!(p, b)[1] for _=1:NROUNDS, (p, b) in zip(map(mkplayer, bs), bs)]
+        actions = [play!(p, b)[1] for _=1:NROUNDS, (p, b) in zip(map(mkplayer, map(length, bs)), bs)]
         ax[:plot](mean(actions .== map(best, bs)', 2), label=name)
     end
 

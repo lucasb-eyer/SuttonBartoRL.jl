@@ -3,6 +3,8 @@ using PyPlot
 plt[:style][:use]("ggplot")
 
 include("utils.jl")
+include("value_estimators.jl")
+include("players.jl")
 
 # The machine!
 # ============
@@ -18,81 +20,6 @@ length(b::MultiBandit) = length(b.μ)
 
 play(b::MultiBandit, a) = randn()*b.σ[a] + b.μ[a]
 best(b::MultiBandit) = indmax(b.μ)
-
-# The players!
-# ============
-
-abstract ValueEstimator
-
-# All players use the same way of estimating value for this plot.
-immutable SampleAverage <: ValueEstimator
-    Qa::Vector{Float64}
-    Na::Vector{Int64}
-
-    SampleAverage(n) = new(zeros(n), zeros(Int64, n))
-end
-
-sampleavg_ve(b::MultiBandit) = SampleAverage(length(b))
-
-function update!(v::SampleAverage, r, a)
-    # Very simple "empirical mean" estimator.
-    v.Na[a] += 1
-    v.Qa[a] += 1/v.Na[a] * (r - v.Qa[a])
-end
-
-abstract Player
-
-# Generic playing
-function play!(p::Player, b::MultiBandit)
-    a = choose_action(p)
-    r = play(b, a)
-    update!(p, r, a)
-    return a, r
-end
-
-# Generic updating only updates value estimator
-update!(p::Player, r, a) = update!(p.v, r, a)
-
-# Mr. greedy!
-# -----------
-
-immutable GreedyPlayer <: Player
-    v::ValueEstimator
-end
-
-choose_action(p::GreedyPlayer) = indmax(p.v.Qa)
-
-# Mr. ϵ-greedy!
-# -------------
-
-immutable ϵGreedyPlayer <: Player
-    v::ValueEstimator
-    ϵ::Float64
-end
-
-# With a small probability, go randomly, else just GO GREEDY
-choose_action(p::ϵGreedyPlayer) = rand() < p.ϵ ? rand(1:length(p.v.Qa)) : indmax(p.v.Qa)
-
-# Mr. τ-greedy!  (my invention, but probably already exists and has a name!)
-# -------------
-
-immutable τGreedyPlayer <: Player
-    v::ValueEstimator
-    τ::Int
-end
-
-# If we're in the first n0 plays, go randomly, else just GO GREEDY
-choose_action(p::τGreedyPlayer) = sum(p.v.Na) < p.τ ? rand(1:length(p.v.Qa)) : indmax(p.v.Qa)
-
-# Mr. Softmax!
-# ------------
-
-immutable SoftMaxPlayer <: Player
-    v::ValueEstimator
-    τ::Float64
-end
-
-choose_action(p::SoftMaxPlayer) = rand(Categorical(softmax(p.v.Qa, p.τ)))
 
 # Thug Aim!
 # =========
@@ -115,20 +42,19 @@ for (mkplayer, name) in [
 
     rewards = zeros(NROUNDS, NGAMES)
     actions = zeros(Int64, NROUNDS, NGAMES)
-    bestact = zeros(Int64, NGAMES)
+    bestact = zeros(Int64, NROUNDS, NGAMES)
     for g=1:NGAMES
         bandit = multibandit(10)
-        player = mkplayer(sampleavg_ve(bandit))
+        player = mkplayer(SampleAverage(length(bandit)))
 
         for r=1:NROUNDS
             actions[r,g], rewards[r,g] = play!(player, bandit)
+            bestact[r,g] = best(bandit)
         end
-
-        bestact[g] = best(bandit)
     end
 
     ax1[:plot](mean(rewards, 2), label=name)
-    ax2[:plot](mean(actions .== bestact', 2)*100, label=name)
+    ax2[:plot](mean(actions .== bestact, 2)*100, label=name)
 end
 
 fig[:suptitle]("10-armed bandit", fontsize=16)
