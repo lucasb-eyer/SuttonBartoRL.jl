@@ -103,7 +103,7 @@ end
 const NROUNDS=2000
 const NGAMES=1000
 
-fig, (ax1, ax2) = subplots(2, 1)
+fig, (ax1, ax2) = subplots(2, 1, figsize=(8,8))
 
 for (probs, ax) in (
     [(0.1, 0.2), ax1],
@@ -124,12 +124,12 @@ for (probs, ax) in (
         ax[:plot](mean(actions .== map(best, bs)', 2), label=name)
     end
 
-    ax[:set_xlabel]("Epochs [plays]")
     ax[:set_ylabel]("Optimal action [%]")
-    ax[:legend](loc="lower right")
 end
 
+ax2[:set_xlabel]("Epochs [plays]")
 ax1[:set_title]("Bandit A (mostly losing)")
 ax2[:set_title]("Bandit B (mostly winning)")
 fig[:suptitle]("Hard binary bandits", fontsize=16)
+leg = fig[:legend](ax1[:get_legend_handles_labels]()..., loc="lower right", bbox_to_anchor=(0.9, 0.1), ncol=2)
 show()
