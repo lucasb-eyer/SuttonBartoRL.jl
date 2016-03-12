@@ -28,10 +28,10 @@ best(b::BinaryBandit) = indmax(b.p)
 # The players!
 # ============
 
-abstract ValueEstimater
+abstract ValueEstimator
 
-# The sample-average value estimater
-immutable SampleAverage <: ValueEstimater
+# The sample-average value estimator
+immutable SampleAverage <: ValueEstimator
     Qa::Vector{Float64}
     Na::Vector{Int64}
 
@@ -63,7 +63,7 @@ update!(p::Player, r, a) = update!(p.v, r, a)
 # -------------
 
 immutable ϵGreedyPlayer <: Player
-    v::ValueEstimater
+    v::ValueEstimator
     ϵ::Float64
 end
 
@@ -74,7 +74,7 @@ choose_action(p::ϵGreedyPlayer) = rand() < p.ϵ ? rand(1:length(p.v.Qa)) : indm
 # ---------------
 
 immutable SupervisedPlayer <: Player
-    v::ValueEstimater
+    v::ValueEstimator
 end
 
 choose_action(p::SupervisedPlayer) = indmax(p.v.Qa)

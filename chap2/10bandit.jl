@@ -20,10 +20,10 @@ best(b::MultiBandit) = indmax(b.μ)
 # The players!
 # ============
 
-abstract ValueEstimater
+abstract ValueEstimator
 
 # All players use the same way of estimating value for this plot.
-immutable SampleAverage <: ValueEstimater
+immutable SampleAverage <: ValueEstimator
     Qa::Vector{Float64}
     Na::Vector{Int64}
 
@@ -55,7 +55,7 @@ update!(p::Player, r, a) = update!(p.v, r, a)
 # -----------
 
 immutable GreedyPlayer <: Player
-    v::ValueEstimater
+    v::ValueEstimator
 end
 
 choose_action(p::GreedyPlayer) = indmax(p.v.Qa)
@@ -64,7 +64,7 @@ choose_action(p::GreedyPlayer) = indmax(p.v.Qa)
 # -------------
 
 immutable ϵGreedyPlayer <: Player
-    v::ValueEstimater
+    v::ValueEstimator
     ϵ::Float64
 end
 
@@ -75,7 +75,7 @@ choose_action(p::ϵGreedyPlayer) = rand() < p.ϵ ? rand(1:length(p.v.Qa)) : indm
 # -------------
 
 immutable τGreedyPlayer <: Player
-    v::ValueEstimater
+    v::ValueEstimator
     τ::Int
 end
 
@@ -86,7 +86,7 @@ choose_action(p::τGreedyPlayer) = sum(p.v.Na) < p.τ ? rand(1:length(p.v.Qa)) :
 # ------------
 
 immutable SoftMaxPlayer <: Player
-    v::ValueEstimater
+    v::ValueEstimator
     τ::Float64
 end
 
