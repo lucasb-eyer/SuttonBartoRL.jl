@@ -24,8 +24,10 @@ immutable DecayingSampleAverage <: ValueEstimator
     Qa::Vector{Float64}
     α::Vector{Float64}
 
-    DecayingSampleAverage(n, α) = all(0 .< α .<= 1) ? new(zeros(n), α) : error("Invalid weight for DecayingSampleAverage value-estimator: $α")
-    DecayingSampleAverage(n, α::Float64) = DecayingSampleAverage(n, fill(α, n))
+    DecayingSampleAverage(Q0::Vector{Float64}, α) = all(0 .< α .<= 1) ? new(Q0, α) : error("Invalid weight for DecayingSampleAverage value-estimator: $α")
+    DecayingSampleAverage(Q0::Vector{Float64}, α::Float64) = DecayingSampleAverage(Q0, fill(α, length(Q0)))
+    DecayingSampleAverage(n::Int, α) = DecayingSampleAverage(zeros(n), α)
+    DecayingSampleAverage(n::Int, α::Float64) = DecayingSampleAverage(n, fill(α, n))
 end
 
 best(v::DecayingSampleAverage) = indmax(v.Qa)
