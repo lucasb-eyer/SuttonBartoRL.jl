@@ -19,3 +19,14 @@ This means that when one observes the reward of an action, one can't infer anyth
 But this is what supervised algorithms do (in principle), and we can see they don't perform well.
 
 <p align=middle><img src=plots/2.4.png/></p>
+
+2.6: Non-stationary bandits
+===========================
+
+This figure is not present in the book, but it corresponds to [Exercise 2.7](https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node20.html).
+It shows the same experiment as the 10-armed bandits above, except that the means of the rewards start all the same and then go on random walks.
+Since the real values of actions are changing over time, both a static value estimators and estimators taking ALL samples into account will not follow this movement and get worse over time or stagnate, respectively.
+What works well in this case, is a decaying estimate, giving old samples less importance the older they get.
+This mechanism is almost identical to the concept of "momentum" in optimization algorithms.
+
+<p align=middle><img src=plots/2.6.png/></p>
