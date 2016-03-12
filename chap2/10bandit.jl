@@ -2,6 +2,8 @@ using Distributions
 using PyPlot
 plt[:style][:use]("ggplot")
 
+include("utils.jl")
+
 # The machine!
 # ============
 immutable MultiBandit
@@ -89,9 +91,6 @@ immutable SoftMaxPlayer <: Player
     v::ValueEstimator
     τ::Float64
 end
-
-# Compute softmax of `x` at temperature `τ`
-function softmax(x, τ) ex = exp(x/τ) ; return ex / sum(ex) end
 
 choose_action(p::SoftMaxPlayer) = rand(Categorical(softmax(p.v.Qa, p.τ)))
 
