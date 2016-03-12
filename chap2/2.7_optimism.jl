@@ -30,8 +30,8 @@ const NGAMES=1000
 fig, (ax1, ax2) = subplots(2, 1)
 
 for (mkplayer, name) in [
-    ((n)-> GreedyPlayer(DecayingSampleAverage(fill(5.0, n), 0.1)), "Greedy optimist"),
     ((n)->ϵGreedyPlayer(DecayingSampleAverage(n, 0.1), 0.1), L"$\epsilon$=0.1 Greedy realist"),
+    ((n)-> GreedyPlayer(DecayingSampleAverage(fill(5.0, n), 0.1)), "Greedy optimist"),
 ]
     println("Playing ", name, "...")
 
@@ -53,10 +53,8 @@ for (mkplayer, name) in [
 end
 
 fig[:suptitle]("10-armed bandit: Optimism", fontsize=16)
-ax1[:set_xlabel]("Epoch [plays]")
 ax2[:set_xlabel]("Epoch [plays]")
 ax1[:set_ylabel]("Average reward")
 ax2[:set_ylabel]("Optimal action [%]")
-ax1[:legend](loc="lower right")
-ax2[:legend](loc="lower right")
+leg = fig[:legend](ax1[:get_legend_handles_labels]()..., loc="lower right", bbox_to_anchor=(0.9, 0.54), ncol=1)
 show()

@@ -30,3 +30,14 @@ What works well in this case, is a decaying estimate, giving old samples less im
 This mechanism is almost identical to the concept of "momentum" in optimization algorithms.
 
 <p align=middle><img src=plots/2.6.png/></p>
+
+2.7: Optimistic value estimators
+================================
+
+This is [Figre 2.4 in the book](https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node21.html).
+It describes a pretty neat trick to greatly improve even the greedy algorithm:
+Initialize the value estimators in a way that they higly overestimate the value of *every* action.
+The algorithm will thus almost always be "disappointed" by the reward and move to another action, until the value estimate are better.
+This encourages exploration as long as the estimates are off, and exploitation once they are good.
+
+<p align=middle><img src=plots/2.7.png/></p>
