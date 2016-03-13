@@ -56,7 +56,7 @@ for (mkplayer, name) in [
     ax2[:plot](mean(actions .== bestact, 2)*100, label=name)
 end
 
-fig[:suptitle]("10-armed bandit", fontsize=16)
+fig[:suptitle]("10-armed bandit: Reinforcement comparison", fontsize=16)
 ax2[:set_xlabel]("Epoch [plays]")
 ax1[:set_ylabel]("Average reward")
 ax2[:set_ylabel]("Optimal action [%]")
