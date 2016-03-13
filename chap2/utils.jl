@@ -20,3 +20,11 @@ function softmax!{T<:Real}(dst::AbstractArray{T}, x::AbstractArray{T}, τ::T=one
 end
 
 softmax{T<:Real}(x::AbstractArray{T}, τ::T=one(T)) = softmax!(Array(T, size(x)), x, τ)
+
+
+# Double the thickness of a legend's lines.
+function fatlegend(legend)
+    for lh in legend[:legendHandles]
+        lh[:set_linewidth](2lh[:get_linewidth]())
+    end
+end
