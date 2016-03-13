@@ -51,3 +51,17 @@ Whether a reward is good or bad is determined using a geometric average (momentu
 The "soft" is an alternative updating preferences slower the more preferred they get.
 
 <p align=middle><img src=plots/2.8.png/></p>
+
+2.9: Pursuit methods
+====================
+
+This is [Figure 2.6 in the book](https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node23.html).
+I couldn't say it more concisely than the book itself:
+
+> Pursuit methods maintain both action-value estimates *and* action preferences,
+> with the preferences continually "pursuing" the action that is greedy according to the current action-value estimates.
+
+The "preference pursuit" is my attempt at solving Exercise 2.13/14:
+creating a pursuit method that doesn't update probabilities but rather preferences, just as stated in the above quote.
+
+<p align=middle><img src=plots/2.9.png/></p>
