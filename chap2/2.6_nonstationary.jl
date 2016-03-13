@@ -3,31 +3,9 @@ using PyPlot
 plt[:style][:use]("ggplot")
 
 include("utils.jl")
+include("bandits.jl")
 include("value_estimators.jl")
 include("players.jl")
-
-# The machine!
-# ============
-immutable RandomWalkMultiBandit
-    μ::Vector{Float64}
-    σ::Vector{Float64}
-    v::Vector{Float64}  # "velocity" of the walks
-end
-
-rwmbandit(n) = RandomWalkMultiBandit(zeros(n), ones(n), ones(n))
-rwmbandit(n, v::Real) = RandomWalkMultiBandit(zeros(n), ones(n), fill(float(v), n))
-
-import Base.length
-length(b::RandomWalkMultiBandit) = length(b.μ)
-
-function play(b::RandomWalkMultiBandit, a)
-    # Random walk!
-    b.μ[:] += b.v .* randn(length(b))
-
-    # New random reward.
-    randn()*b.σ[a] + b.μ[a]
-end
-best(b::RandomWalkMultiBandit) = indmax(b.μ)
 
 # Thug Aim!
 # =========

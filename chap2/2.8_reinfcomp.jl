@@ -3,23 +3,9 @@ using PyPlot
 plt[:style][:use]("ggplot")
 
 include("utils.jl")
+include("bandits.jl")
 include("value_estimators.jl")
 include("players.jl")
-
-# The machine!
-# ============
-immutable MultiBandit
-    μ::Vector{Float64}
-    σ::Vector{Float64}
-end
-
-multibandit(n) = MultiBandit(randn(n), ones(n))
-
-import Base.length
-length(b::MultiBandit) = length(b.μ)
-
-play(b::MultiBandit, a) = randn()*b.σ[a] + b.μ[a]
-best(b::MultiBandit) = indmax(b.μ)
 
 # Thug Aim!
 # =========
