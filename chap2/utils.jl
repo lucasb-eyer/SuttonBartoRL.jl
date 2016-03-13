@@ -1,5 +1,5 @@
 # Largely based on Lin Dahua's NumericExtensions.jl implementation!
-function softmax!{T<:Real}(dst::AbstractArray{T}, x::AbstractArray{T}, τ::T=1)
+function softmax!{T<:Real}(dst::AbstractArray{T}, x::AbstractArray{T}, τ::T=one(T))
     !isempty(x) || error("softmax!: empty array is not allowed.")
     length(dst) == length(x) || error("Inconsistent argument dimensions.")
 
@@ -19,4 +19,4 @@ function softmax!{T<:Real}(dst::AbstractArray{T}, x::AbstractArray{T}, τ::T=1)
     dst
 end
 
-softmax{T<:Real}(x::AbstractArray{T}, τ::T=1) = softmax!(Array(T, size(x)), x, τ)
+softmax{T<:Real}(x::AbstractArray{T}, τ::T=one(T)) = softmax!(Array(T, size(x)), x, τ)
