@@ -34,10 +34,20 @@ This mechanism is almost identical to the concept of "momentum" in optimization 
 2.7: Optimistic value estimators
 ================================
 
-This is [Figre 2.4 in the book](https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node21.html).
+This is [Figure 2.4 in the book](https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node21.html).
 It describes a pretty neat trick to greatly improve even the greedy algorithm:
 Initialize the value estimators in a way that they higly overestimate the value of *every* action.
 The algorithm will thus almost always be "disappointed" by the reward and move to another action, until the value estimate are better.
 This encourages exploration as long as the estimates are off, and exploitation once they are good.
 
 <p align=middle><img src=plots/2.7.png/></p>
+
+2.8: Reinforcement comparison
+=============================
+
+This is [Figure 2.5 in the book](https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node22.html).
+Instead of estimating a value for actions, this keeps track of its "preference" for actions, increasing it on good reward and decreasing it on bad reward.
+Whether a reward is good or bad is determined using a geometric average (momentum) of recent past rewards.
+The "soft" is an alternative updating preferences slower the more preferred they get.
+
+<p align=middle><img src=plots/2.8.png/></p>
